@@ -2,3 +2,6 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+.env
+cache_sp.geojson
+cache_sp.parquet

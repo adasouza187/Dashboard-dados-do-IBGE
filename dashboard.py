@@ -15,7 +15,7 @@ _SVG = {
     "target": '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
     "trophy": '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>',
     "star": '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
-    "scale": '<path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10M12 3v18M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>',
+    "scale": '<path d="m16 16 3-8 3 8c-.87.65-1.920 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10M12 3v18M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>',
     "alert": '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/>',
     "sliders": '<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
     "layers": '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
@@ -63,6 +63,13 @@ h1,h2,h3{color:#fff;font-weight:700;}
 .row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);color:#d8d8e8;}
 .row:last-child{border-bottom:none;}
 .row b{margin-left:auto;color:#fff;}
+/* NOVO: gráficos com estilo de card (só os que estão em colunas; o mapa fica de fora) */
+[data-testid="stColumn"] [data-testid="stPlotlyChart"]{
+  background:rgba(255,255,255,.05);backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.1);border-radius:18px;
+  padding:10px 12px;overflow:hidden;transition:.25s;}
+[data-testid="stColumn"] [data-testid="stPlotlyChart"]:hover{
+  transform:translateY(-4px);box-shadow:0 10px 30px rgba(26,152,80,.35);}
 /* Barra lateral */
 [data-testid="stSidebar"] .block-container{padding:1.5rem 1.2rem;}
 [data-testid="stSidebar"] [data-testid="stVerticalBlock"]{gap:.6rem;}
@@ -276,7 +283,11 @@ fig.update_layout(height=650, margin=dict(l=0, r=0, t=0, b=0), paper_bgcolor="rg
 st.plotly_chart(fig, use_container_width=True)
 
 # ---------- Gráficos ----------
-TEMA = dict(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font_color="#ddd", height=450)
+# NOVO: título branco e margens ajustadas
+TEMA = dict(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font_color="#ddd", height=450,
+            title_font=dict(color="#fff", size=17), margin=dict(l=20, r=20, t=60, b=20))
+GRADE = dict(gridcolor="rgba(255,255,255,.07)", zerolinecolor="rgba(255,255,255,.1)")  # NOVO
+
 c1, c2 = st.columns(2)
 with c1:
     top = dados.nlargest(10, "Nota").iloc[::-1]
@@ -284,6 +295,7 @@ with c1:
                 color_continuous_scale="RdYlGn", text=top.Nota.map(lambda v: f"{v:.0f}"))
     fb.update_layout(title="Os 10 distritos com maior nota", yaxis_title=None,
                      coloraxis_showscale=False, xaxis_range=[0, 100], **TEMA)
+    fb.update_xaxes(**GRADE); fb.update_yaxes(**GRADE)  # NOVO
     st.plotly_chart(fb, use_container_width=True)
 with c2:
     fs = px.scatter(dados, x="Renda", y="Prop_20_49", size="Pop_20_49", color="Nota",
@@ -294,6 +306,7 @@ with c2:
                                 textposition="top center", showlegend=False, textfont_color="#fff",
                                 marker=dict(size=22, color="rgba(0,0,0,0)", line=dict(color="#fff", width=3))))
     fs.update_layout(title="Renda x público jovem (bolha maior = mais pessoas)", **TEMA)
+    fs.update_xaxes(**GRADE); fs.update_yaxes(**GRADE)  # NOVO
     st.plotly_chart(fs, use_container_width=True)
 
 # ---------- O que os dados dizem ----------
@@ -354,4 +367,3 @@ with tab1:
 with tab2:
     st.dataframe(fracos[["Distrito", "Nota", "Renda", "Pop_20_49", "Prop_20_49"]],
                  hide_index=True, use_container_width=True, column_config=COLS)
-
